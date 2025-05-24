@@ -1,0 +1,17 @@
+1. Limitaciones:
+o Dependencia de la Conectividad: El sistema depende de la
+conectividad de red para el envío de datos, lo que puede ser un
+problema en áreas con cobertura limitada.
+o Precisión de Sensores: Los sensores pueden tener variaciones en su
+precisión y requerir calibración regular.
+o Costo de Implementación: Los componentes utilizados pueden ser
+costosos, limitando la escalabilidad del proyecto.
+2. Mejoras Futuras:
+o Mejorar la Conectividad: Implementar protocolos de comunicación
+alternativos (como Zigbee o NB-IoT) que sean más robustos en entornos
+rurales.
+o Optimización de Sensores: Investigar y utilizar sensores de mayor
+precisión y durabilidad, con mantenimiento mínimo.
+o Interfaz de Usuario Mejorada: Desarrollar una aplicación móvil que
+permita un acceso más intuitivo a los datos y configuraciones del
+sistema.

@@ -1,0 +1,17 @@
+Contribuciones
+1. Cómo Contribuir:
+o Reportar Problemas: Cualquier error o problema debe ser reportado a
+través del sistema de issues en el repositorio del proyecto.
+o Enviar Solicitudes de Extracción: Si deseas realizar mejoras o añadir
+características, por favor haz un fork del repositorio, realiza tus cambios
+y envía una solicitud de extracción (pull request).
+o Participar en el Desarrollo: Los colaboradores son bienvenidos a
+discutir nuevas ideas y mejoras en la sección de discusiones del
+repositorio.
+Licencia
+Este proyecto está bajo la Licencia MIT, lo que permite a los usuarios copiar,
+modificar y distribuir el software, siempre que se incluya el aviso de licencia y un
+aviso de copyright. Los usuarios son libres de usar el software para cualquier
+propósito, incluyendo comercial, pero no se ofrece ninguna garantía sobre su
+funcionamiento. Para más detalles, por favor consulta el archivo LICENSE incluido en
+el repositorio del proyecto.

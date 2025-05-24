@@ -1,0 +1,168 @@
+#define TINY_GSM_MODEM_SIM7070
+#include <WiFi.h>
+#include <esp_now.h>
+
+#define SerialMon Serial
+#define SerialAT Serial1
+
+const char apn[] = "internet.itelcel.com";
+const char gprsUser[] = "webgprs";
+const char gprsPass[] = "webgprs2002";
+
+//const char* broker = "broker.hivemq.com";
+const char* broker = "test.mosquitto.org";
+//const char* broker = "192.168.137.63";
+const char* topicData = "QUIVALDITEZO";
+
+#include <TinyGsmClient.h>
+#include <PubSubClient.h>
+
+TinyGsm modem(SerialAT);
+TinyGsmClient client(modem);
+PubSubClient mqtt(client);
+
+typedef struct struct_message {
+    float temperature;
+    float humidity;
+    float tdsValue;
+    float pHValue;
+} struct_message;
+struct_message incomingData;
+
+bool newDataReceived = false;
+
+float lastTemperature = -1;
+float lastHumidity = -1;
+float lastTDS = -1;
+float lastPH = -1;
+
+// Temporizador
+unsigned long lastSendTime = 0;
+const unsigned long sendInterval = 10000; // 10 segundos
+unsigned long lastStatusPrintTime = 0;
+const unsigned long statusPrintInterval = 10000; // 10 segundos
+
+void OnDataRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *incomingDataBytes, int len) {
+    memcpy(&incomingData, incomingDataBytes, sizeof(incomingData));
+    newDataReceived = true;  // Marcar que hay nuevos datos
+}
+
+bool mqttConnect() {
+    SerialMon.print("Conectando a MQTT...");
+    bool status = mqtt.connect("Lilygo7070Client");
+    SerialMon.println(status ? "Éxito" : "Fallo");
+    return status;
+}
+
+void setup() {
+    SerialMon.begin(115200);
+    delay(1000);
+
+    SerialMon.println("Esperando...");
+    SerialAT.begin(115200);
+    delay(6000);
+    SerialMon.println("Inicializando módem...");
+    modem.restart();
+
+    SerialMon.println("Activando contexto PDP...");
+    if (modem.isGprsConnected()) {
+        SerialMon.println("Contexto PDP ya activo.");
+    } else {
+        if (modem.gprsConnect(apn, gprsUser, gprsPass)) {
+            SerialMon.println("Contexto PDP activado correctamente.");
+        }
+    }
+
+    if (modem.getSimStatus() != SIM_READY) {
+        SerialMon.println("¡Tarjeta SIM no detectada!");
+        return;
+    }
+    SerialMon.println("Tarjeta SIM está lista.");
+
+    int16_t signalQuality = modem.getSignalQuality();
+    if (signalQuality >= 0) {
+        SerialMon.print("Calidad de señal: ");
+        SerialMon.println(signalQuality);
+    } else {
+        SerialMon.println("¡Error al obtener calidad de señal!");
+    }
+
+    SerialMon.print("Esperando red...");
+    if (!modem.waitForNetwork()) {
+        SerialMon.println(" fallo");
+        delay(10000);
+        return;
+    }
+    SerialMon.println(" éxito");
+
+    if (modem.isNetworkConnected()) {
+        SerialMon.println("Red conectada");
+    }
+
+    String ip = modem.getLocalIP();
+    SerialMon.print("Dirección IP asignada: ");
+    SerialMon.println(ip);
+
+    mqtt.setServer(broker, 1883);
+    mqttConnect();
+
+    WiFi.mode(WIFI_STA);
+    if (esp_now_init() != ESP_OK) {
+        SerialMon.println("Error al iniciar ESP-NOW");
+        return;
+    }
+    esp_now_register_recv_cb(OnDataRecv);
+}
+
+void loop() {
+    if (!mqtt.connected()) {
+        mqttConnect();
+    }
+    mqtt.loop();
+
+    // Enviar datos cada 10 segundos
+    if (newDataReceived && (millis() - lastSendTime >= sendInterval)) {
+        newDataReceived = false;  // Reiniciar la bandera
+
+        // Imprimir datos de todos los sensores
+        SerialMon.print("Temp: "); SerialMon.print(incomingData.temperature); SerialMon.println(" °C");
+        SerialMon.print("Hum: "); SerialMon.print(incomingData.humidity); SerialMon.println(" %");
+        SerialMon.print("TDS: "); SerialMon.print(incomingData.tdsValue); SerialMon.println(" ppm");
+        SerialMon.print("pH: "); SerialMon.print(incomingData.pHValue); SerialMon.println();
+
+        // Crear la carga útil MQTT con todos los datos
+        char mqttPayload[150];
+        snprintf(mqttPayload, sizeof(mqttPayload), 
+                 "{\"temp\":%.2f,\"hum\":%.2f,\"tds\":%.2f,\"ph\":%.2f}",
+                 incomingData.temperature, incomingData.humidity, incomingData.tdsValue, incomingData.pHValue);
+        
+        mqtt.publish(topicData, mqttPayload);
+        SerialMon.println("Datos enviados a MQTT");
+
+        // Actualizar el tiempo del último envío
+        lastSendTime = millis();
+    }
+
+    // Imprimir información del módem cada 10 segundos
+    if (millis() - lastStatusPrintTime >= statusPrintInterval) {
+        SerialMon.println(modem.getModemInfo()); // Diagnóstico del módem
+        lastStatusPrintTime = millis(); // Actualizar el tiempo
+    }
+
+    if (!modem.isNetworkConnected()) {
+        SerialMon.println("Red desconectada");
+        if (!modem.waitForNetwork(180000L, true)) {
+            SerialMon.println(" fallo");
+            delay(10000);
+            return;
+        }
+        SerialMon.println("Red reconectada");
+    }
+
+    if (!modem.isGprsConnected()) {
+        SerialMon.println("Error: No hay conexión PDP. Verificando...");
+        if (modem.gprsConnect(apn, gprsUser, gprsPass)) {
+            SerialMon.println("PDP activado con éxito.");
+        }
+    }
+}

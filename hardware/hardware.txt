@@ -1,0 +1,14 @@
+Componentes Utilizados
+• Placas de Desarrollo:
+o Lilygo SIM7070: Para la comunicación celular y MQTT.
+o Heltec LoRa 32: Para la transmisión de datos a través de LoRa.
+• Sensores:
+o DHT11: Para medir temperatura y humedad.
+o Sensor TDS: Para medir sólidos totales disueltos.
+o Sensor de pH: Para medir la acidez del agua.
+• Pantalla:
+o OLED SSD1306: Para mostrar datos en tiempo real.
+• Otros Componentes:
+o Cables de conexión y protoboard para realizar las conexiones necesarias.
+o Módulo de alimentación para asegurar un suministro adecuado a los
+dispositivos.

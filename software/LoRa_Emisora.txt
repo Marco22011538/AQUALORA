@@ -1,0 +1,193 @@
+
+// Libraries for LoRa
+#include <SPI.h>
+#include <LoRa.h>
+
+// Libraries for OLED Display
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+// Libraries for DHT11
+#include <DHT.h>
+
+// Define the pins used by the LoRa transceiver module
+#define SCK 5
+#define MISO 19
+#define MOSI 27
+#define SS 18
+#define RST 14
+#define DIO0 26
+
+// Frequency for North America
+#define BAND 915E6
+
+// OLED pins
+#define OLED_SDA 4
+#define OLED_SCL 15 
+#define OLED_RST 16
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+
+// DHT11 sensor definition
+#define DHTPIN 13     // Pin where the DHT11 is connected
+#define DHTTYPE DHT11 // DHT 11
+DHT dht(DHTPIN, DHTTYPE);
+
+// TDS sensor definition
+#define TDSPIN 32 // Pin where the TDS sensor is connected
+
+// pH sensor definitions
+#define PHPIN 34 // Pin for pH output (analog)
+#define DOPIN 25 // Pin for digital output (if needed)
+
+// Packet counter
+int readingID = 0;
+String LoRaMessage = "";
+
+// Initialize OLED display
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RST);
+
+void startOLED() {
+  pinMode(OLED_RST, OUTPUT);
+  digitalWrite(OLED_RST, LOW);
+  delay(20);
+  digitalWrite(OLED_RST, HIGH);
+
+  Wire.begin(OLED_SDA, OLED_SCL);
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    Serial.println(F("Asignación SSD1306 fallida"));
+    for (;;); // Don't proceed, loop forever
+  }
+  display.clearDisplay();
+  display.setTextColor(WHITE);
+  display.setTextSize(1);
+  display.print("ENVIADOR LORA");
+}
+
+void startLoRA() {
+  SPI.begin(SCK, MISO, MOSI, SS);
+  LoRa.setPins(SS, RST, DIO0);
+
+  int counter = 0;
+  while (!LoRa.begin(BAND) && counter < 10) {
+    Serial.print(".");
+    counter++;
+    delay(500);
+  }
+  if (counter == 10) {
+    Serial.println("¡Falló el inicio de LoRa!"); 
+  }
+  Serial.println("¡Inicialización de LoRa OK!");
+  display.setCursor(0, 10);
+  display.clearDisplay();
+  display.print("¡LORA INICIADA!");
+  display.display();
+  delay(2000);
+}
+
+// Function to get the TDS value
+float readTDS() {
+  int numReadings = 10; // Number of readings to average
+  long total = 0;
+
+  for (int i = 0; i < numReadings; i++) {
+    total += analogRead(TDSPIN);
+    delay(100); // Small delay between readings
+  }
+
+  int averageReading = total / numReadings;
+
+  // Convert the analog reading to TDS
+  float voltage = averageReading * (5.0 / 1023.0); // Convert to voltage
+  // Ajustar la constante multiplicativa
+  float tdsValue = (133.42 * voltage * voltage * voltage - 255.86 * voltage * voltage + 857.39 * voltage) * 0.15; // Ajustar según sea necesario
+
+  return tdsValue; // Return the calculated TDS value
+}
+
+// Function to read the pH value
+float readPH() {
+  int numReadings = 10; // Number of readings to average
+  long total = 0;
+
+  for (int i = 0; i < numReadings; i++) {
+    total += analogRead(PHPIN);
+    delay(100); // Small delay between readings
+  }
+
+  int averageReading = total / numReadings;
+
+  // Convert the analog reading to pH
+  float voltage = averageReading * (5.0 / 1023.0); // Convert to voltage
+  float pHValue = 3.5 * voltage; // Ajustar según tu sensor
+
+  // Ajustar la lectura del pH
+  pHValue = pHValue * 0.7; // Cambiar este valor según sea necesario
+
+  return pHValue; // Return the calculated pH value
+}
+
+void setup() {
+  Serial.begin(115200);
+  startOLED();
+  dht.begin(); // Inicializar DHT11
+  startLoRA();
+  pinMode(TDSPIN, INPUT); // Configura el pin del sensor TDS como entrada
+  pinMode(PHPIN, INPUT);   // Configura el pin del sensor pH como entrada
+  pinMode(DOPIN, INPUT);   // Configura el pin del sensor pH digital (si se utiliza)
+}
+
+void loop() {
+  // Read temperature and humidity from DHT11
+  float temperature = dht.readTemperature();
+  float humidity = dht.readHumidity();
+  
+  // Check if any reads failed
+  if (isnan(temperature) || isnan(humidity)) {
+    Serial.println("¡Error al leer del sensor DHT!");
+    return;
+  }
+
+  // Read TDS value
+  float tdsValue = readTDS(); // Leer el valor TDS
+  
+  // Read pH value
+  float pHValue = readPH(); // Leer el valor de pH
+  
+  // Prepare LoRa message
+  LoRaMessage = String(readingID) + "/" + String(temperature) + "&" + String(humidity) + "#" + String(tdsValue) + "@" + String(pHValue);
+  
+  // Send LoRa packet to receiver
+  LoRa.beginPacket();
+  LoRa.print(LoRaMessage);
+  LoRa.endPacket();
+
+  // Display readings
+  display.clearDisplay();
+  display.setCursor(0, 0); 
+  display.setTextSize(1);
+  display.print("¡Paquete enviado!");
+  display.setCursor(0, 10);
+  display.print("Temp: ");
+  display.print(temperature);
+  display.setCursor(0, 20);
+  display.print("Hum: ");
+  display.print(humidity);
+  display.setCursor(0, 30);
+  display.print("TDS: ");
+  display.print(tdsValue, 2); // Display TDS with 2 decimal places
+  display.setCursor(0, 40);
+  display.print("pH: ");
+  display.print(pHValue, 2); // Display pH with 2 decimal places
+  display.setCursor(0, 50);
+  display.print("ID: ");
+  display.print(readingID);
+  display.display();
+
+  Serial.print("Enviando paquete: ");
+  Serial.println(LoRaMessage);
+  readingID++;
+
+  delay(1000); // Delay before next reading
+}

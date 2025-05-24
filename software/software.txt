@@ -1,0 +1,59 @@
+Tecnologías Utilizadas
+• Lenguajes de Programación: C++
+• Frameworks y Bibliotecas:
+o Arduino IDE para programación de microcontroladores.
+o TinyGSM: Para la comunicación con el módem SIM7070.
+o PubSubClient: Para la implementación de MQTT.
+o LoRa: Para la comunicación de datos inalámbrica.
+o Adafruit GFX y Adafruit SSD1306: Para la visualización en pantallas OLED.
+o DHT: Para la lectura de temperatura y humedad.
+• Herramientas: Arduino IDE, MQTT Broker (Mosquitto), Grafana (para visualización),
+Zabbix (para monitoreo).
+Funcionalidades
+El software desarrollado incluye las siguientes funcionalidades:
+• Monitoreo de Sensores: Lee continuamente datos de temperatura, humedad, TDS y
+pH a través de sensores conectados.
+• Comunicación MQTT: Envía los datos recolectados a un broker MQTT para su visualización y análisis en tiempo real.
+• Transmisión LoRa: Envía datos a un receptor usando tecnología LoRa, permitiendo
+la comunicación a larga distancia.
+• Interfaz de Usuario: Muestra los datos en una pantalla OLED, facilitando la
+visualización inmediata de los valores de los sensores.
+• Sensibilización y Conexión: Permite la configuración de módulos ESP-NOW para la
+comunicación entre dispositivos en la red local.
+Estructura del Código
+1. Módulo de Monitoreo (Lilygo SIM7070):
+Funciones: Inicializa el módem, conecta a la red, gestiona la comunicación
+MQTT y procesa los datos de los sensores.
+Clases: TinyGsm, TinyGsmClient, PubSubClient.
+2. Módulo de Emisora (Heltec LoRa 32):
+Funciones: Inicializa LoRa, lee datos de los sensores (DHT, TDS, pH) y envía
+la información a través de LoRa.
+Clases: DHT, LoRa.
+3. Módulo de Receptora (Heltec LoRa 32):
+Funciones: Recibe datos enviados por el módulo emisor, los procesa y los
+muestra en la pantalla OLED.
+Estructura de Datos: struct_message para el envío de datos entre
+dispositivos.
+4. Base de Datos y Monitoreo:
+MQTT: Recibe y almacena datos en tiempo real, con scripts que permiten la
+visualización en Grafana.
+o Zabbix: Para la supervisión del rendimiento y el estado de los dispositivos.
+Instrucciones de Instalación
+1. Requisitos Previos:
+Instalar Arduino IDE.
+Configurar el entorno de desarrollo para el uso de bibliotecas necesarias
+(TinyGSM, PubSubClient, LoRa, DHT, Adafruit SSD1306).
+2. Configuración del Hardware:
+Conectar los sensores (DHT, TDS, pH) a los pines definidos en el código.
+Configurar la pantalla OLED y conectar el módem SIM7070.
+3. Cargar el Código:
+Abrir Arduino IDE, cargar el código fuente correspondiente a cada módulo
+(emisor, receptor, SIM7070).
+Compilar y cargar el código en cada dispositivo.
+4. Configuración del MQTT Broker:
+Instalar Mosquitto en un servidor o PC.
+Configurar los parámetros de conexión en el código (broker, usuario,
+contraseña).
+5. Visualización:
+Configurar Grafana para conectarse al broker MQTT y visualizar los datos.
+Instalar y configurar Zabbix para monitoreo adicional si es necesario

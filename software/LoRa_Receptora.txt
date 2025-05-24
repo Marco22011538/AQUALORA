@@ -1,0 +1,176 @@
+// Libraries for LoRa
+#include <SPI.h>
+#include <LoRa.h>
+
+// Libraries for OLED Display
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+// Libraries for ESP-NOW
+#include <esp_now.h>
+#include <WiFi.h>
+
+// Define the pins used by the LoRa transceiver module
+#define SCK 5
+#define MISO 19
+#define MOSI 27
+#define SS 18
+#define RST 14
+#define DIO0 26
+
+// OLED pins
+#define OLED_SDA 4
+#define OLED_SCL 15 
+#define OLED_RST 16
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+
+// Packet counter
+int readingID = 0;
+String LoRaMessage = "";
+
+// Initialize OLED display
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RST);
+
+// Structure to send data via ESP-NOW
+typedef struct struct_message {
+    float temperature;
+    float humidity;
+    float tdsValue;
+    float pHValue;
+} struct_message;
+
+// Create an instance of struct_message
+struct_message myData;
+
+// MAC address of the receiver
+uint8_t broadcastAddress[] = {0x10, 0x06, 0x1C, 0xB2, 0x07, 0x58}; // MAC del receptor
+esp_now_peer_info_t peerInfo;
+
+void startOLED() {
+    pinMode(OLED_RST, OUTPUT);
+    digitalWrite(OLED_RST, LOW);
+    delay(20);
+    digitalWrite(OLED_RST, HIGH);
+
+    Wire.begin(OLED_SDA, OLED_SCL);
+    if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+        Serial.println(F("Asignación SSD1306 fallida"));
+        for (;;); // Don't proceed, loop forever
+    }
+    display.clearDisplay();
+    display.setTextColor(WHITE);
+    display.setTextSize(1);
+}
+
+void startLoRA() {
+    SPI.begin(SCK, MISO, MOSI, SS);
+    LoRa.setPins(SS, RST, DIO0);
+
+    int counter = 0;
+    while (!LoRa.begin(915E6) && counter < 10) {
+        Serial.print(".");
+        counter++;
+        delay(500);
+    }
+    if (counter == 10) {
+        Serial.println("¡Falló el inicio de LoRa!");
+    }
+    Serial.println("¡Inicialización de LoRa OK!");
+}
+
+void startESP_NOW() {
+    // Set device as a Wi-Fi Station
+    WiFi.mode(WIFI_STA);
+
+    // Init ESP-NOW
+    if (esp_now_init() != ESP_OK) {
+        Serial.println("Error initializing ESP-NOW");
+        return;
+    }
+
+    // Register peer
+    memcpy(peerInfo.peer_addr, broadcastAddress, 6);
+    peerInfo.channel = 0;  
+    peerInfo.encrypt = false;
+
+    // Add peer        
+    if (esp_now_add_peer(&peerInfo) != ESP_OK) {
+        Serial.println("Failed to add peer");
+        return;
+    }
+}
+
+void setup() {
+    Serial.begin(115200);
+    startOLED();
+    startLoRA();
+    startESP_NOW();
+}
+
+void loop() {
+    // Check for incoming LoRa packets
+    int packetSize = LoRa.parsePacket();
+    if (packetSize) {
+        String LoRaMessage = "";
+        while (LoRa.available()) {
+            LoRaMessage += (char)LoRa.read();
+        }
+
+        // Parse the received message
+        Serial.print("Paquete recibido: ");
+        Serial.println(LoRaMessage);
+
+        // Split the message into components
+        int firstSlash = LoRaMessage.indexOf('/');
+        int secondAmpersand = LoRaMessage.indexOf('&');
+        int thirdHash = LoRaMessage.indexOf('#');
+        int fourthAt = LoRaMessage.indexOf('@');
+
+        if (firstSlash != -1 && secondAmpersand != -1 && thirdHash != -1 && fourthAt != -1) {
+            myData.temperature = LoRaMessage.substring(firstSlash + 1, secondAmpersand).toFloat();
+            myData.humidity = LoRaMessage.substring(secondAmpersand + 1, thirdHash).toFloat();
+            myData.tdsValue = LoRaMessage.substring(thirdHash + 1, fourthAt).toFloat();
+            myData.pHValue = LoRaMessage.substring(fourthAt + 1).toFloat();
+
+            // Display readings on the OLED
+            display.clearDisplay();
+            display.setCursor(0, 0);
+            display.setTextSize(1);
+            display.print("¡Paquete recibido!");
+            display.setCursor(0, 10);
+            display.print("Temp: ");
+            display.print(myData.temperature);
+            display.print(" C");
+            display.setCursor(0, 20);
+            display.print("Hum: ");
+            display.print(myData.humidity);
+            display.print(" %");
+            display.setCursor(0, 30);
+            display.print("TDS: ");
+            display.print(myData.tdsValue, 2);
+            display.print(" ppm");
+            display.setCursor(0, 40);
+            display.print("pH: ");
+            display.print(myData.pHValue, 2);
+            display.setCursor(0, 50);
+            display.print("ID: ");
+            display.print(readingID);
+            display.display();
+
+            // Send data via ESP-NOW
+            esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *)&myData, sizeof(myData));
+            if (result == ESP_OK) {
+                Serial.println("Datos enviados con éxito");
+            } else {
+                Serial.println("Error enviando los datos");
+            }
+        } else {
+            Serial.println("Formato de mensaje incorrecto");
+        }
+
+        readingID++;
+        delay(1000); // Delay before next reading
+    }
+}

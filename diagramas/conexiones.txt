@@ -1,0 +1,39 @@
+Topología Lógica y Física
+Cableada
+1. Descripción de la Red Cableada:
+o Tipo de Cableado: Se utiliza cableado de tipo UTP (par trenzado) para
+conectar dispositivos en la red local, como routers y switches.
+o Dispositivos de Red:
+▪ Router: Para gestionar la conexión a Internet y la comunicación
+entre dispositivos en la red local.
+▪ Switch: Para expandir el número de dispositivos que pueden
+conectarse a la red.
+2. Configuración:
+o Conectar el router al módem de Internet.
+o Conectar el switch al router utilizando un cable UTP.
+o Conectar dispositivos de monitoreo (PC, servidores) al switch.
+Inalámbrica
+1. Descripción de la Red Inalámbrica:
+o Tecnologías Utilizadas:
+▪ Wi-Fi: Para la comunicación entre el Lilygo SIM7070 y el broker
+MQTT.
+▪ LoRa: Para la comunicación entre el Heltec LoRa 32 (emisor y
+receptor).
+2. Configuración:
+o Wi-Fi:
+▪ Configurar el módulo SIM7070 para conectarse a la red móvil
+utilizando los parámetros APN, usuario y contraseña.
+▪ Establecer la conexión con el broker MQTT para la transmisión
+de datos.
+o LoRa:
+▪ Configurar ambos módulos LoRa (emisor y receptor) en la
+misma frecuencia (915 MHz).
+▪ Asegurarse de que ambos módulos utilicen la misma
+configuración de pin y parámetros de transmisión.
+▪ Realizar pruebas de comunicación para verificar que los datos
+se envían correctamente entre el emisor y el receptor.
+3. Dirección y Protocolo:
+o LoRa: Utiliza un esquema de comunicación basado en paquetes,
+donde cada paquete lleva un identificador único.
+o MQTT: Utiliza temas (topics) para dirigir los mensajes entre suscriptores
+y publicadores

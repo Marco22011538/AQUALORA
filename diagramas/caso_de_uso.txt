@@ -1,0 +1,23 @@
+1. Monitoreo de Calidad del Agua
+o Acciones: El sistema recolecta datos de temperatura, humedad, TDS y
+pH a través de sensores conectados.
+o Respuestas Esperadas: Los datos son enviados a un broker MQTT y
+mostrados en una pantalla OLED. Se espera que el sistema notifique
+cualquier anormalidad en los valores que excedan los límites
+establecidos.
+2. Transmisión de Datos
+o Acciones: Los datos recolectados son empaquetados y enviados a
+través de LoRa a un receptor.
+o Respuestas Esperadas: El receptor recibe los datos correctamente y
+los muestra en su interfaz, confirmando la recepción exitosa.
+3. Acceso Remoto a Datos
+o Acciones: Los usuarios pueden acceder a los datos en tiempo real a
+través de una aplicación conectada al broker MQTT.
+o Respuestas Esperadas: Los usuarios ven gráficos y estadísticas de la
+calidad del agua, permitiendo un análisis efectivo y decisiones
+informadas.
+4. Alertas y Notificaciones
+o Acciones: El sistema evalúa continuamente los datos y envía alertas si
+los niveles de pH o TDS son críticos.
+o Respuestas Esperadas: Los usuarios reciben notificaciones
+inmediatas, permitiendo una rápida intervención para mitigar riesgos.

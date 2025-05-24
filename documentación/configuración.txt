@@ -1,0 +1,28 @@
+Instrucciones para la Configuración Física de los Componentes de Hardware
+1. Componentes Necesarios:
+o Lilygo SIM7070: Para comunicación celular.
+o Heltec LoRa 32: Para comunicación LoRa.
+o DHT11: Sensor de temperatura y humedad.
+o Sensor TDS: Para medir sólidos totales disueltos.
+o Sensor de pH: Para medir la acidez del agua.
+o Pantalla OLED SSD1306: Para visualizar datos.
+2. Conexiones Físicas:
+o Lilygo SIM7070:
+▪ Conectar el pin TX del módem al pin RX de la placa y el pin RX
+del módem al pin TX de la placa.
+▪ Conectar la alimentación (VCC y GND) del módem a la fuente de
+alimentación adecuada.
+o Heltec LoRa 32:
+▪ Conectar los pines SCK, MISO, MOSI, SS, RST y DIO0 a los pines
+correspondientes en la placa.
+▪ Conectar el DHT11 al pin digital definido en el código (por
+ejemplo, pin 13).
+▪ Conectar el sensor TDS al pin analógico definido (por ejemplo,
+pin 32).
+▪ Conectar el sensor de pH al pin analógico definido (por ejemplo,
+pin 34).
+▪ Conectar la pantalla OLED a los pines SDA y SCL.
+3. Verificación:
+o Asegurarse de que todas las conexiones estén firmes y que no haya
+cortocircuitos.
+o Utilizar un multímetro para verificar voltajes si es necesario.
