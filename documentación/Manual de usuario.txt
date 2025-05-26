@@ -1,0 +1,76 @@
+Manual de Usuario del Prototipo de Monitoreo de Calidad del Agua
+Introducción
+Este manual proporciona instrucciones detalladas sobre el uso del prototipo de
+monitoreo de calidad del agua. Este sistema mide parámetros críticos como
+temperatura, humedad, sólidos totales disueltos (TDS) y pH, transmitiendo los datos
+en tiempo real para su análisis y monitoreo.
+Contenidos del Paquete
+• 1 x Módulo Lilygo SIM7070
+• 1 x Módulo Heltec LoRa 32
+• 1 x Sensor DHT11 (temperatura y humedad)
+• 1 x Sensor TDS
+• 1 x Sensor de pH
+• 1 x Pantalla OLED SSD1306
+• Cables de conexión
+• Manual del usuario
+Configuración Inicial
+1. Requisitos Previos
+• Fuente de Alimentación: Asegúrate de contar con una fuente de alimentación
+adecuada para los módulos.
+• Conexión a Internet: El módulo SIM7070 requiere conexión a la red móvil.
+2. Conexiones Físicas
+1. Lilygo SIM7070:
+o Conectar el módem a la placa y asegurar que esté alimentado
+correctamente.
+2. Heltec LoRa 32:
+o Conectar los pines de los sensores:
+▪ DHT11 a un pin digital (ej. pin 13).
+▪ Sensor TDS a un pin analógico (ej. pin 32).
+▪ Sensor de pH a un pin analógico (ej. pin 34).
+o Conectar la pantalla OLED a los pines SDA y SCL.
+3. Verificación de Conexiones
+• Asegúrate de que todas las conexiones estén firmes y sin cortocircuitos.
+• Realiza una verificación de voltajes si es necesario usando un multímetro.
+Uso del Prototipo
+1. Encendido del Sistema
+• Conecta la fuente de alimentación al prototipo.
+• Enciende el sistema. La pantalla OLED mostrará un mensaje de inicialización.
+2. Monitoreo de Sensores
+• El sistema comenzará a recopilar datos de temperatura, humedad, TDS y pH
+automáticamente.
+• Los valores se mostrarán en la pantalla OLED y se enviarán a través de MQTT y
+LoRa.
+3. Acceso a Datos
+• Visualización en Pantalla: La pantalla OLED mostrará los datos en tiempo
+real.
+• Acceso Remoto: Conéctate al broker MQTT para visualizar datos desde una
+aplicación compatible.
+4. Notificaciones
+• El sistema enviará alertas si los niveles de pH o TDS superan los límites
+establecidos.
+• Asegúrate de tener configuradas las notificaciones en tu aplicación de
+monitoreo.
+Mantenimiento
+• Calibración de Sensores: Realiza calibraciones periódicas de los sensores
+para asegurar lecturas precisas.
+• Revisar Conexiones: Inspecciona las conexiones regularmente para evitar
+fallos en el sistema.
+• Actualizar Software: Mantén el software actualizado para beneficiarte de
+mejoras y nuevas características.
+Solución de Problemas
+Problemas Comunes
+• El sistema no se enciende:
+o Verifica la conexión de la fuente de alimentación.
+o Asegúrate de que la batería esté cargada.
+• Datos incorrectos en la pantalla:
+o Revisa las conexiones de los sensores.
+o Calibra los sensores según las instrucciones del fabricante.
+• No se recibe notificación:
+o Verifica la conexión a Internet.
+o Asegúrate de que el sistema esté conectado al broker MQTT.
+Contacto y Soporte
+Para más información o asistencia técnica, contacta al soporte del proyecto en
+22011008@itsoeh.edu.mx o visita nuestro repositorio en https://github.com/Marco22011538/AQUALORA.
+Este prototipo de monitoreo de calidad del agua es una herramienta valiosa para la
+gestión de recursos hídricos. Siguiendo este manual, podrás operar y mantener el
+sistema de manera efectiva. ¡Gracias por utilizar nuestro sistema!
