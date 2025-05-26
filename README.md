@@ -90,7 +90,7 @@ El sistema se compone de sensores de **pH**, **TDS** y **temperatura/humedad** (
 ##  Contribuciones
 
 ¿Quieres contribuir? Sigue estos pasos:
-- Reporta errores en [Issues](https://github.com/Marco22011538/AQUALORA)
+
 - Haz un fork y crea un **Pull Request**
 - Únete a las discusiones del proyecto
 
