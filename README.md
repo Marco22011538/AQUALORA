@@ -75,7 +75,7 @@ El sistema se compone de sensores de **pH**, **TDS** y **temperatura/humedad** (
 5. **Visualizar datos** en Grafana:
    - Conecta el broker MQTT como fuente de datos.
 
-## ⚠ Limitaciones y Riesgos
+## Limitaciones y Riesgos
 
 - La precisión depende de la correcta calibración de sensores.
 - Se requiere mantenimiento regular.
